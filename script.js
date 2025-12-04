@@ -101,6 +101,21 @@ function processKML(kmlString, elevationAdjustment) {
             coordinatesElement.textContent = adjustedCoords;
         }
 
+        // Set or update extrude to 0 (no wall from ground)
+        let extrude = lineString.getElementsByTagName('extrude')[0];
+        if (extrude) {
+            extrude.textContent = '0';
+        } else {
+            extrude = xmlDoc.createElement('extrude');
+            extrude.textContent = '0';
+            const coordsElement = lineString.getElementsByTagName('coordinates')[0];
+            if (coordsElement) {
+                lineString.insertBefore(extrude, coordsElement);
+            } else {
+                lineString.appendChild(extrude);
+            }
+        }
+
         // Set or update altitudeMode
         let altitudeMode = lineString.getElementsByTagName('altitudeMode')[0];
         if (altitudeMode) {
