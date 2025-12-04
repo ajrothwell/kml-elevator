@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KML Elevator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>KML Elevator</h1>
+        <p class="description">Adjust elevation values in KML LineStrings</p>
+
+        <div class="input-section">
+            <div class="form-group">
+                <label for="kmlFile">Select KML File:</label>
+                <input type="file" id="kmlFile" accept=".kml" />
+            </div>
+
+            <div class="form-group">
+                <label for="elevationAdjustment">Elevation Adjustment (meters):</label>
+                <input type="number" id="elevationAdjustment" value="0" step="0.1" />
+            </div>
+
+            <button id="processBtn" disabled>Process KML</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="results" class="results hidden">
+            <h2>Results</h2>
+            <p id="resultInfo"></p>
+            <button id="downloadBtn">Download Modified KML</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
