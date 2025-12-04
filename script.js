@@ -4,6 +4,7 @@ let fileName = '';
 
 const kmlFileInput = document.getElementById('kmlFile');
 const elevationInput = document.getElementById('elevationAdjustment');
+const lineColorInput = document.getElementById('lineColor');
 const processBtn = document.getElementById('processBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const statusDiv = document.getElementById('status');
@@ -39,9 +40,10 @@ processBtn.addEventListener('click', () => {
     }
 
     const adjustment = parseFloat(elevationInput.value);
+    const lineColor = lineColorInput.value;
 
     try {
-        const result = processKML(kmlContent, adjustment);
+        const result = processKML(kmlContent, adjustment, lineColor);
         modifiedKML = result.kml;
 
         showStatus('Processing completed successfully!', 'success');
@@ -75,7 +77,7 @@ function showStatus(message, type) {
     statusDiv.className = `status ${type}`;
 }
 
-function processKML(kmlString, elevationAdjustment) {
+function processKML(kmlString, elevationAdjustment, lineColor) {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(kmlString, 'text/xml');
 
@@ -85,6 +87,9 @@ function processKML(kmlString, elevationAdjustment) {
         throw new Error('Invalid KML file format');
     }
 
+    // Convert hex color to KML format (aabbggrr)
+    const kmlColor = hexToKmlColor(lineColor);
+
     // Find all LineString elements
     const lineStrings = xmlDoc.getElementsByTagName('LineString');
     let lineStringCount = 0;
@@ -92,6 +97,38 @@ function processKML(kmlString, elevationAdjustment) {
     for (let i = 0; i < lineStrings.length; i++) {
         const lineString = lineStrings[i];
         lineStringCount++;
+
+        // Find or create the parent Placemark
+        let placemark = lineString.parentElement;
+        while (placemark && placemark.tagName !== 'Placemark') {
+            placemark = placemark.parentElement;
+        }
+
+        if (placemark) {
+            // Set or update Style for the Placemark
+            let style = placemark.getElementsByTagName('Style')[0];
+            if (!style) {
+                style = xmlDoc.createElement('Style');
+                placemark.insertBefore(style, placemark.firstChild);
+            }
+
+            // Set LineStyle
+            let lineStyle = style.getElementsByTagName('LineStyle')[0];
+            if (!lineStyle) {
+                lineStyle = xmlDoc.createElement('LineStyle');
+                style.appendChild(lineStyle);
+            }
+
+            // Set color
+            let colorElement = lineStyle.getElementsByTagName('color')[0];
+            if (colorElement) {
+                colorElement.textContent = kmlColor;
+            } else {
+                colorElement = xmlDoc.createElement('color');
+                colorElement.textContent = kmlColor;
+                lineStyle.appendChild(colorElement);
+            }
+        }
 
         // Process coordinates
         const coordinatesElement = lineString.getElementsByTagName('coordinates')[0];
@@ -167,4 +204,18 @@ function adjustElevations(coordinatesString, adjustment) {
     });
 
     return '\n' + adjustedPairs.join('\n') + '\n';
+}
+
+function hexToKmlColor(hex) {
+    // Remove # if present
+    hex = hex.replace('#', '');
+
+    // Extract RGB components
+    const r = hex.substring(0, 2);
+    const g = hex.substring(2, 4);
+    const b = hex.substring(4, 6);
+
+    // KML color format is aabbggrr (alpha, blue, green, red)
+    // ff = fully opaque
+    return 'ff' + b + g + r;
 }
