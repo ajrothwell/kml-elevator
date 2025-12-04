@@ -104,11 +104,11 @@ function processKML(kmlString, elevationAdjustment) {
         // Set or update altitudeMode
         let altitudeMode = lineString.getElementsByTagName('altitudeMode')[0];
         if (altitudeMode) {
-            altitudeMode.textContent = 'relativeToGround';
+            altitudeMode.textContent = 'absolute';
         } else {
             // Create new altitudeMode element
             altitudeMode = xmlDoc.createElement('altitudeMode');
-            altitudeMode.textContent = 'relativeToGround';
+            altitudeMode.textContent = 'absolute';
             // Insert before coordinates element
             const coordsElement = lineString.getElementsByTagName('coordinates')[0];
             if (coordsElement) {
